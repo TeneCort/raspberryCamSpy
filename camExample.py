@@ -29,6 +29,14 @@ def apply_invert(frame):
 def apply_grayScale(frame):
     return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+# Button pressed callback
+def recordPressed(channel):
+    print('Starting record \r')
+
+def recordPlayPressed(channel):
+    print('Playing record \r')
+
+# TODO: Relocate artifact code inside this function to cleanup 
 def artifact(frame):
     return frame
 # Initialising some values
@@ -39,6 +47,8 @@ fWidth = 0
 cur.nodelay(1)
 captureDuration = 10
 startTime = 0
+GPIO.add_event_detect(10, GPIO.RISING, callback = recordPressed)
+GPIO.add_event_detect(12, GPIO.RISING, callback = recordPlayPressed)
 
 # Check if camera opened successfully
 if (cap.isOpened()== False): 
@@ -49,12 +59,7 @@ else:
     
 # Read until video is completed
 while(cap.isOpened()):
-    
-    if GPIO.input(10) == GPIO.HIGH:
-        print('ayyyy')
-    if GPIO.input(12) == GPIO.HIGH:
-        print('Lmao')    
-    # imshow won't display without this
+     # imshow won't display without this
     cv2.waitKey(1)
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -113,6 +118,8 @@ while(cap.isOpened()):
         # but we need to restart showing the camera feed instead 
         #break
  
+# Cleans the GPIOs 
+GPIO.cleanup() 
 # Closes keyboard interface
 curses.endwin()
 # When everything done, release the video capture object

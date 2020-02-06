@@ -14,6 +14,7 @@ cap = cv2.VideoCapture(0)
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # For the record... ;)
 def resetRecordedFile():
@@ -32,6 +33,7 @@ def artifact(frame):
     return frame
 # Initialising some values
 record = False
+playBack = False
 out = resetRecordedFile()
 fWidth = 0
 cur.nodelay(1)
@@ -47,9 +49,11 @@ else:
     
 # Read until video is completed
 while(cap.isOpened()):
+    
     if GPIO.input(10) == GPIO.HIGH:
         print('ayyyy')
-    
+    if GPIO.input(12) == GPIO.HIGH:
+        print('Lmao')    
     # imshow won't display without this
     cv2.waitKey(1)
     # Capture frame-by-frame
@@ -58,7 +62,7 @@ while(cap.isOpened()):
     if ret == True:
         
         if record == True:
-            if time.time() - startTime < captureDuration:    
+            if time.time() - startTime < captureDuration:                
                 out.write(frame)
             else:
                 record = False
@@ -77,6 +81,9 @@ while(cap.isOpened()):
         if fWidth >= width-1:
             fWidth = 0
         
+        if playBack == True:
+            cv2.waitKey(50)
+        
         try:
             char = cur.getch()
             if char > 0:
@@ -89,6 +96,7 @@ while(cap.isOpened()):
                         out = resetRecordedFile()
                         startTime = time.time()
                 if chr(char) == 'a':
+                    playBack = True
                     cap = cv2.VideoCapture('test.avi')
                 elif chr(char) == 'q':
                     break
@@ -99,6 +107,8 @@ while(cap.isOpened()):
     else:
         # We reload the capture
         cap = cv2.VideoCapture(0)
+        # usually this condition is read when the playback has ended, thus we switch it to false
+        playBack = False
         # Loop breaker is here by default,
         # but we need to restart showing the camera feed instead 
         #break

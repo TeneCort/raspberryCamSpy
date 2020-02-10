@@ -5,8 +5,6 @@ import curses
 import time
 import RPi.GPIO as GPIO
 
-# For keyboard input
-cur = curses.initscr()
 
 # Create a VideoCapture object and read from input file
 # If the input is the camera, pass 0 instead of the video file name
@@ -44,7 +42,6 @@ record = False
 playBack = False
 out = resetRecordedFile()
 fWidth = 0
-cur.nodelay(1)
 captureDuration = 10
 startTime = 0
 GPIO.add_event_detect(10, GPIO.RISING, callback = recordPressed)
@@ -60,7 +57,7 @@ else:
 # Read until video is completed
 while(cap.isOpened()):
      # imshow won't display without this
-    cv2.waitKey(1)
+    key = cv2.waitKey(1)
     # Capture frame-by-frame
     ret, frame = cap.read()
     
@@ -90,24 +87,22 @@ while(cap.isOpened()):
             cv2.waitKey(50)
         
         try:
-            char = cur.getch()
-            if char > 0:
-                if chr(char) == 'z':
-                    record = not record
-                    print(' Recording has started for : ', captureDuration, ' seconds\r')
-                    if record == False:
-                        out.release()
-                    else:
-                        out = resetRecordedFile()
-                        startTime = time.time()
-                if chr(char) == 'a':
-                    playBack = True
-                    cap = cv2.VideoCapture('/home/pi/Desktop/camspy/test.avi')
-                elif chr(char) == 'q':
-                    break
+            if key == ord('z'):
+                record = not record
+                print(' Recording has started for : ', captureDuration, ' seconds\r')
+                if record == False:
+                    out.release()
+                else:
+                    out = resetRecordedFile()
+                    startTime = time.time()
+            if key == ord('a'):
+                playBack = True
+                cap = cv2.VideoCapture('/home/pi/Desktop/camspy/test.avi')
+            elif key == ord('q'):
+                break
                 
         except KeyboardInterrupt:
-            curses.endwin()
+            break
             
     else:
         # We reload the capture
@@ -119,9 +114,7 @@ while(cap.isOpened()):
         #break
  
 # Cleans the GPIOs 
-GPIO.cleanup() 
-# Closes keyboard interface
-curses.endwin()
+GPIO.cleanup()
 # When everything done, release the video capture object
 cap.release()
 # Release the output object in case something happens

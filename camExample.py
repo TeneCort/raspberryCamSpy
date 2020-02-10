@@ -19,7 +19,7 @@ GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 # For the record... ;)
 def resetRecordedFile():
     fourcc = cv2.VideoWriter_fourcc(*'XVID') 
-    return cv2.VideoWriter('test.avi', fourcc, 20, (640,480))
+    return cv2.VideoWriter('/home/pi/Desktop/camspy/test.avi', fourcc, 20, (640,480))
     
 # Negative filter function
 def apply_invert(frame):
@@ -102,7 +102,7 @@ while(cap.isOpened()):
                         startTime = time.time()
                 if chr(char) == 'a':
                     playBack = True
-                    cap = cv2.VideoCapture('test.avi')
+                    cap = cv2.VideoCapture('/home/pi/Desktop/camspy/test.avi')
                 elif chr(char) == 'q':
                     break
                 

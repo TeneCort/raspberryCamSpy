@@ -1,9 +1,9 @@
 import cv2
 import random
 import numpy as np
-import curses
 import time
 import RPi.GPIO as GPIO
+import vlc
 
 # Initialising a full screen window
 cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
@@ -13,14 +13,18 @@ cv2.setWindowProperty("window", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 # If the input is the camera, pass 0 instead of the video file name
 cap = cv2.VideoCapture(0)
 
+# GPIO initialisation
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
+# VLC player initialisation
+scream = vlc.MediaPlayer("/home/pi/Desktop/camspy/scream.mp3")
+
 # For the record... ;)
 def resetRecordedFile():
     fourcc = cv2.VideoWriter_fourcc(*'XVID') 
-    return cv2.VideoWriter('/home/pi/Desktop/camspy/test.avi', fourcc, 20, (640,480))
+    return cv2.VideoWriter('/home/pi/Desktop/camspy/recording.avi', fourcc, 20, (640,480))
     
 # Negative filter function
 def apply_invert(frame):
@@ -40,6 +44,12 @@ def recordPlayPressed(channel):
 # TODO: Relocate artifact code inside this function to cleanup 
 def artifact(frame):
     return frame
+
+def playSound():
+    scream.stop()
+    scream.pause()
+    scream.play()
+
 # Initialising some values
 record = False
 playBack = False
@@ -100,7 +110,9 @@ while(cap.isOpened()):
                     startTime = time.time()
             if key == ord('a'):
                 playBack = True
-                cap = cv2.VideoCapture('/home/pi/Desktop/camspy/test.avi')
+                cap = cv2.VideoCapture('/home/pi/Desktop/camspy/recording.avi')
+            if key == ord('t'):
+                playSound()
             elif key == ord('q'):
                 break
                 

@@ -19,7 +19,7 @@ GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # VLC player initialisation
-scream = vlc.MediaPlayer("/home/pi/Desktop/camspy/scream.mp3")
+scream = vlc.MediaPlayer("/home/pi/Desktop/camspy/scream.wav")
 
 # For the record... ;)
 def resetRecordedFile():

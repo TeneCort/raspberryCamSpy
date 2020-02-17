@@ -1,6 +1,5 @@
 import cv2
 import random
-import numpy as np
 import time
 import RPi.GPIO as GPIO
 import vlc
@@ -15,8 +14,9 @@ cap = cv2.VideoCapture(0)
 
 # GPIO initialisation
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # VLC player initialisation
 scream = vlc.MediaPlayer("/home/pi/Desktop/camspy/scream.wav")
@@ -25,6 +25,14 @@ scream = vlc.MediaPlayer("/home/pi/Desktop/camspy/scream.wav")
 def resetRecordedFile():
     fourcc = cv2.VideoWriter_fourcc(*'XVID') 
     return cv2.VideoWriter('/home/pi/Desktop/camspy/recording.avi', fourcc, 20, (640,480))
+
+# Initialising some values
+record = False
+playBack = False
+out = resetRecordedFile()
+fWidth = 0
+captureDuration = 10
+startTime = 0
     
 # Negative filter function
 def apply_invert(frame):
@@ -34,31 +42,37 @@ def apply_invert(frame):
 def apply_grayScale(frame):
     return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-# Button pressed callback
-def recordPressed(channel):
-    print('Starting record \r')
+# Record button pressed callback
+def recordPressed():
+    global record
+    global startTime
+    global out
+    record = not record
+    print(' Recording has started for : ', captureDuration, ' seconds\r')
+    if record == False:
+        out.release()
+    else:
+        out = resetRecordedFile()
+        startTime = time.time()
 
-def recordPlayPressed(channel):
-    print('Playing record \r')
+# Play recorded file callback
+def recordPlayPressed():
+    global playBack
+    global cap
+    playBack = True
+    cap = cv2.VideoCapture('/home/pi/Desktop/camspy/recording.avi')
 
 # TODO: Relocate artifact code inside this function to cleanup 
 def artifact(frame):
     return frame
-
+# Plays audio file in dir
 def playSound():
     scream.stop()
-    scream.pause()
     scream.play()
 
-# Initialising some values
-record = False
-playBack = False
-out = resetRecordedFile()
-fWidth = 0
-captureDuration = 10
-startTime = 0
-GPIO.add_event_detect(10, GPIO.RISING, callback = recordPressed)
-GPIO.add_event_detect(12, GPIO.RISING, callback = recordPlayPressed)
+GPIO.add_event_detect(12, GPIO.RISING, callback = recordPressed)
+GPIO.add_event_detect(16, GPIO.RISING, callback = recordPlayPressed)
+GPIO.add_event_detect(18, GPIO.RISING, callback = playSound)
 
 # Check if camera opened successfully
 if (cap.isOpened()== False): 
@@ -82,6 +96,7 @@ while(cap.isOpened()):
             else:
                 record = False
                 print('Recording done, press A to playback \r')
+                
         # Will modify later
         for y in range(0, height-1):
             if random.randint(0,100) >= 75:
@@ -101,16 +116,9 @@ while(cap.isOpened()):
         
         try:
             if key == ord('z'):
-                record = not record
-                print(' Recording has started for : ', captureDuration, ' seconds\r')
-                if record == False:
-                    out.release()
-                else:
-                    out = resetRecordedFile()
-                    startTime = time.time()
+                recordPressed()   
             if key == ord('a'):
-                playBack = True
-                cap = cv2.VideoCapture('/home/pi/Desktop/camspy/recording.avi')
+                recordPlayPressed()
             if key == ord('t'):
                 playSound()
             elif key == ord('q'):

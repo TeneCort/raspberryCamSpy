@@ -43,7 +43,7 @@ def apply_grayScale(frame):
     return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 # Record button pressed callback
-def recordPressed():
+def recordPressed(channel):
     global record
     global startTime
     global out
@@ -56,7 +56,7 @@ def recordPressed():
         startTime = time.time()
 
 # Play recorded file callback
-def recordPlayPressed():
+def recordPlayPressed(channel):
     global playBack
     global cap
     playBack = True
@@ -66,7 +66,7 @@ def recordPlayPressed():
 def artifact(frame):
     return frame
 # Plays audio file in dir
-def playSound():
+def playSound(channel):
     scream.stop()
     scream.play()
 

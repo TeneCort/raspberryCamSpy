@@ -43,7 +43,8 @@ def apply_grayScale(frame):
     return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 # Record button pressed callback
-def recordPressed(channel):
+def recordPressed(self):
+    time.sleep(0.25)
     global record
     global startTime
     global out
@@ -56,7 +57,7 @@ def recordPressed(channel):
         startTime = time.time()
 
 # Play recorded file callback
-def recordPlayPressed(channel):
+def recordPlayPressed(self):
     global playBack
     global cap
     playBack = True
@@ -66,13 +67,13 @@ def recordPlayPressed(channel):
 def artifact(frame):
     return frame
 # Plays audio file in dir
-def playSound(channel):
+def playSound(self):
     scream.stop()
     scream.play()
 
-GPIO.add_event_detect(12, GPIO.RISING, callback = recordPressed)
-GPIO.add_event_detect(16, GPIO.RISING, callback = recordPlayPressed)
-GPIO.add_event_detect(18, GPIO.RISING, callback = playSound)
+GPIO.add_event_detect(12, GPIO.RISING, callback = recordPressed, bouncetime=800)
+GPIO.add_event_detect(16, GPIO.RISING, callback = recordPlayPressed, bouncetime=800)
+GPIO.add_event_detect(18, GPIO.RISING, callback = playSound, bouncetime=800)
 
 # Check if camera opened successfully
 if (cap.isOpened()== False): 
@@ -112,7 +113,7 @@ while(cap.isOpened()):
             fWidth = 0
         
         if playBack == True:
-            cv2.waitKey(50)
+            cv2.waitKey(100)
         
         try:
             if key == ord('z'):
